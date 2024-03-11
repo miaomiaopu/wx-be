@@ -11,7 +11,7 @@
   "scripts": {
     "test": "echo \\\"Error: no test specified\\\" && exit 1",
     "dev": "nodemon --watch src --watch config src/index.js",
-    "start": "node src/index.js"
+    "serve": "node src/index.js"
   },
   "repository": {
     "type": "git",
