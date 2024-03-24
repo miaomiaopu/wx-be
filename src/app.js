@@ -31,8 +31,8 @@ databasePool
     config.logger.error("Error:", error.message);
   })
   .finally(() => {
-    if (connection) {
-      connection.release();
+    if (conn) {
+      conn.release();
     }
   });
 
