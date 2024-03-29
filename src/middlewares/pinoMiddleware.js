@@ -1,5 +1,3 @@
-// middlewares/pinoMiddleware.js
-
 import pinoHttp from 'pino-http';
 import config from '../configs/index.js';
 

@@ -11,6 +11,8 @@
 ```
 wx-be
 ├─ .gitignore
+├─ db
+│  └─ create_table.sql
 ├─ LICENSE
 ├─ package-lock.json
 ├─ package.json
@@ -26,5 +28,6 @@ wx-be
    ├─ middlewares
    │  └─ pinoMiddleware.js
    ├─ models
+   │  └─ User.js
    └─ utils
 ```

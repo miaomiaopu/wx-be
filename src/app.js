@@ -1,5 +1,3 @@
-// app.js
-
 import express from "express";
 import redis from "redis";
 import pinoMiddleware from "./middlewares/pinoMiddleware.js";
@@ -20,24 +18,20 @@ app.use(pinoMiddleware);
 // 使用中间件解析请求体
 app.use(express.json());
 
-// 连接数据库
+// 测试数据库连接
 databasePool
   .getConnection()
   .then((conn) => {
-    connection = conn;
-    config.logger.info("Connected to MariaDB");
+    config.logger.info("Connect to MariaDB!");
+    conn.release();
   })
   .catch((error) => {
-    config.logger.error("Error:", error.message);
+    config.logger.error("Error connect to MariaDB:", error.message);
   })
   .finally(() => {
-    if (conn) {
-      conn.release();
-    }
+    // 启动服务器
+    const PORT = process.env.PORT || 8000;
+    app.listen(PORT, () => {
+      config.logger.info(`Server is running on port ${PORT}`);
+    });
   });
-
-// 启动服务器
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  config.logger.info(`Server is running on port ${PORT}`);
-});

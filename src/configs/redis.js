@@ -1,5 +1,3 @@
-// config/redis.js
-
 // 设置 Redis
 const redisConfig = {
   host: "localhost",

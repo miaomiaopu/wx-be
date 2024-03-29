@@ -1,11 +1,13 @@
-// config/logger.js
-
 // 设置日志
 import pino from "pino";
-import pretty from "pino-pretty";
 
 const logger = pino({
-  prettifier: pretty,
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+    },
+  },
 });
 
 export default logger;

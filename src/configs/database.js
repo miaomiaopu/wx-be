@@ -1,5 +1,3 @@
-// config/database.js
-
 import mariadb from "mariadb";
 
 // 设置数据库，连接池
