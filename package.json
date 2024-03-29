@@ -4,11 +4,14 @@
   "version": "1.0.0",
   "description": "基于Node.js的知识卡片分享平台的后端框架",
   "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "express": "^4.18.3",
-    "mariadb": "^3.2.3",
+    "mariadb": "^3.3.0",
     "pino-http": "^9.0.0",
     "pino-pretty": "^10.3.1",
-    "redis": "^4.6.13"
+    "redis": "^4.6.13",
+    "sequelize": "^6.37.1"
   },
   "main": "src/app.js",
   "scripts": {

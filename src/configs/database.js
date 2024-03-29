@@ -1,13 +1,15 @@
-import mariadb from "mariadb";
+import { Sequelize } from "sequelize";
 
-// 设置数据库，连接池
-const pool = mariadb.createPool({
+const sequelize = new Sequelize("wxzk", "root", "wxzk", {
   host: "localhost",
-  user: "root",
-  password: "wxzk",
-  database: "wxzk",
+  dialect: "mariadb",
   port: 3306,
-  connectionLimit: 5,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
 });
 
-export default pool;
+export default sequelize;

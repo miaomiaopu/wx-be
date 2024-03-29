@@ -1,13 +1,21 @@
 import express from "express";
+import cors from "cors";
 import redis from "redis";
 import pinoMiddleware from "./middlewares/pinoMiddleware.js";
-import config from "./configs/index.js";
-import databasePool from "./configs/database.js";
+import redisConfig from "./configs/redis.js";
+import sequelize from "./configs/database.js";
+import logger from "./configs/logger.js";
+import bodyParser from "body-parser";
+import userRouter from "./routes/userRoutes.js";
+import errorHandler from "./middlewares/errorHandler.js";
 
 const app = express();
 
+// 使用 cors
+app.use(cors());
+
 // 使用 Redis 配置
-const redisClient = redis.createClient(config.redis);
+const redisClient = redis.createClient(redisConfig);
 redisClient.on("error", (err) => {
   console.error(`Redis error: ${err}`);
 });
@@ -16,22 +24,25 @@ redisClient.on("error", (err) => {
 app.use(pinoMiddleware);
 
 // 使用中间件解析请求体
-app.use(express.json());
+app.use(bodyParser.json());
+
+// 用户路由
+app.use("/api", userRouter);
+
+// 统一错误处理
+app.use(errorHandler);
 
 // 测试数据库连接
-databasePool
-  .getConnection()
-  .then((conn) => {
-    config.logger.info("Connect to MariaDB!");
-    conn.release();
-  })
-  .catch((error) => {
-    config.logger.error("Error connect to MariaDB:", error.message);
-  })
-  .finally(() => {
+sequelize
+  .authenticate()
+  .then(() => {
+    logger.info("Connect to MariaDB!");
     // 启动服务器
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
-      config.logger.info(`Server is running on port ${PORT}`);
+      logger.info(`Server is running on port ${PORT}`);
     });
+  })
+  .catch((error) => {
+    logger.error("Error connect to MariaDB:", error.message);
   });

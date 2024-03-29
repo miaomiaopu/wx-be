@@ -21,11 +21,12 @@ wx-be
    ├─ app.js
    ├─ configs
    │  ├─ database.js
-   │  ├─ index.js
    │  ├─ logger.js
    │  └─ redis.js
    ├─ controllers
+   │  └─ userControllers.js
    ├─ middlewares
+   │  ├─ errorHandler.js
    │  └─ pinoMiddleware.js
    ├─ models
    │  └─ User.js

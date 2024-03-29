@@ -1,6 +1,6 @@
 import pinoHttp from 'pino-http';
-import config from '../configs/index.js';
+import logger from '../configs/logger.js';
 
-const pinoMiddleware = pinoHttp({ logger: config.logger });
+const pinoMiddleware = pinoHttp({ logger: logger });
 
 export default pinoMiddleware;
