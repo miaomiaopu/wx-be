@@ -1,9 +1,9 @@
 import express from "express";
-import { createUser } from "../controllers/userControllers.js";
+import { login } from "../controllers/userControllers.js";
 
 const userRouter = express.Router();
 
 // 创建新用户的路由
-userRouter.post("/create-user", createUser);
+userRouter.post("/login", login);
 
 export default userRouter;

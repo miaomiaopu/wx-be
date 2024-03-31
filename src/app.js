@@ -1,11 +1,9 @@
 import express from "express";
 import cors from "cors";
 import redis from "redis";
-import pinoMiddleware from "./middlewares/pinoMiddleware.js";
 import redisConfig from "./configs/redis.js";
 import sequelize from "./configs/database.js";
 import logger from "./configs/logger.js";
-import bodyParser from "body-parser";
 import userRouter from "./routes/userRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
@@ -21,10 +19,11 @@ redisClient.on("error", (err) => {
 });
 
 // 使用 Pino 日志
-app.use(pinoMiddleware);
+// app.use(pinoMiddleware);
 
 // 使用中间件解析请求体
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // 用户路由
 app.use("/api", userRouter);
@@ -44,5 +43,5 @@ sequelize
     });
   })
   .catch((error) => {
-    logger.error("Error connect to MariaDB:", error.message);
+    logger.error("Error connect to MariaDB:" + error.message);
   });
