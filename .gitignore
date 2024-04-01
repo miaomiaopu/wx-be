@@ -132,3 +132,6 @@ dist
 # git
 
 .git/
+
+#app secret
+src/configs/wx.js
