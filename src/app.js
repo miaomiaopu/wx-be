@@ -1,22 +1,28 @@
 import express from "express";
 import cors from "cors";
-import redis from "redis";
-import redisConfig from "./configs/redis.js";
 import sequelize from "./configs/database.js";
 import logger from "./configs/logger.js";
 import userRouter from "./routes/userRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import getAccessToken from "./utils/getAccessToken.js";
+import redisPool from "./configs/redis.js";
 
 const app = express();
 
 // 使用 cors
 app.use(cors());
 
-// 使用 Redis 配置
-const redisClient = redis.createClient(redisConfig);
-redisClient.on("error", (err) => {
-  console.error(`Redis error: ${err}`);
-});
+// 测试 RedisPool
+redisPool
+  .pipeline()
+  .set("foo", "bar")
+  .get("foo")
+  .del("foo")
+  .exec((err, results) => {
+    if (err) {
+      logger.error(`Redis pool error: ${err}`);
+    }
+  });
 
 // 使用 Pino 日志
 // app.use(pinoMiddleware);
@@ -45,3 +51,5 @@ sequelize
   .catch((error) => {
     logger.error("Error connect to MariaDB:" + error.message);
   });
+
+getAccessToken();
