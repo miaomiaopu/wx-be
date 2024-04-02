@@ -3,7 +3,7 @@ import { Sequelize } from "sequelize";
 const sequelize = new Sequelize("wxzk", "root", "wxzk", {
   host: "localhost",
   dialect: "mariadb",
-  port: 3306,
+  port: 13306,
   pool: {
     max: 5,
     min: 0,
