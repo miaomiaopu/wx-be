@@ -12,7 +12,7 @@ const getAccessToken = async () => {
     }
     // 如果 Access token 有效，则返回有效的 token
     if (token) {
-      logger.info(`Access token: ${token}`);
+      logger.debug(`Access token: ${token}`);
       return token;
     } else {
       // Access token 无效，先获取 token
@@ -29,8 +29,8 @@ const getAccessToken = async () => {
           data
         );
         const { access_token, expires_in } = response.data;
-        logger.info(`Access token: ${access_token}`);
-        logger.info(`Expires in: ${expires_in}`);
+        logger.debug(`Access token: ${access_token}`);
+        logger.debug(`Expires in: ${expires_in}`);
 
         // 将获取到的 access_token 存入 Redis，并设置过期时间
         redisPool.setex("access_token", expires_in, access_token, (err) => {
