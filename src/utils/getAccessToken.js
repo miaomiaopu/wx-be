@@ -5,7 +5,7 @@ import wx from "../configs/wx.js"
 
 const getAccessToken = async () => {
   // 先从 Redis 中获取 access_token
-  redisPool.get("access_token", async (err, token) => {
+  await redisPool.get("access_token", async (err, token) => {
     if (err) {
       logger.error(`Redis error: ${err}`);
       return;

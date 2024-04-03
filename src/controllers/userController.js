@@ -9,18 +9,26 @@ const getThirdSession = async (third_session, res) => {
   logger.debug(`third_session: ${third_session}`);
 
   // 判断Redis中 third_session 是否存在，存在用 third_session 直接获取；否则返回 404 错误
-  const openid = redisPool.get(third_session, (err) => {
+  let openid = null;
+  await redisPool.get(third_session, (err, result) => {
     if (err) {
       logger.error(`Redis error: ${err}`);
+    } else {
+      openid = result;
     }
   });
-
   if (!openid) {
     res.status(404).json({ message: "Third session key not found" });
   } else {
-    res
-      .status(200)
-      .json({ message: "Login with third session key successful", third_session: third_session });
+    // third_session 再次存入 Redis 中, 设置成 3 天有效
+    redisPool.setex(third_session, 259200, openid, (err) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      }
+    });
+    res.status(200).json({
+      message: "Login with third session key successful",
+    });
   }
 };
 
