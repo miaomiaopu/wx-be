@@ -6,6 +6,7 @@ import userRouter from "./routes/userRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import getAccessToken from "./utils/getAccessToken.js";
 import redisPool from "./configs/redis.js";
+import dataRouter from "./routes/dataRoutes.js";
 
 const app = express();
 
@@ -33,6 +34,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // 用户路由
 app.use("/api", userRouter);
+// 数据路由
+app.use("/api", dataRouter);
 
 // 统一错误处理
 app.use(errorHandler);
