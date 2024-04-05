@@ -153,8 +153,41 @@ const getInfo = async (req, res) => {
     }
   } catch (error) {
     logger.error(`Error get info: ${error}`);
-    res.status(500).json({ message: "Failed to login" });
+    res.status(500).json({ message: "Failed to get info" });
   }
 };
 
-export { login, getInfo };
+const changeNickname = async (req, res) => {
+  try {
+    logger.info("/api/changeNickname");
+    const { third_session, nickname } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      logger.debug(`openid: ${openid}`);
+      logger.debug(`nickname: ${nickname}`)
+      // 实现具体逻辑
+
+      await User.update({ nickname }, { where: { openid: openid } });
+
+      res.status(200).json({
+        message: "Change nickname successful",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error change nickname: ${error}`);
+    res.status(500).json({ message: "Failed to change nickname" });
+  }
+};
+
+export { login, getInfo, changeNickname };

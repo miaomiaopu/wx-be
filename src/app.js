@@ -7,6 +7,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 import getAccessToken from "./utils/getAccessToken.js";
 import redisPool from "./configs/redis.js";
 import dataRouter from "./routes/dataRoutes.js";
+import informationRouter from "./routes/informationRoutes.js";
 
 const app = express();
 
@@ -36,6 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", userRouter);
 // 数据路由
 app.use("/api", dataRouter);
+// 消息路由
+app.use("/api", informationRouter)
 
 // 统一错误处理
 app.use(errorHandler);
