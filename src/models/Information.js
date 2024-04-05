@@ -35,7 +35,7 @@ const Information = sequelize.define(
     },
   },
   {
-    tableName: "infomations",
+    tableName: "informations",
     timestamps: false, // 禁用自动添加 createdAt 和 updatedAt 字段
   }
 );
