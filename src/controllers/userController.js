@@ -1,4 +1,4 @@
-import { Data, User } from "../models/index.js";
+import { Data, User, Information } from "../models/index.js";
 import logger from "../configs/logger.js";
 import axios from "axios";
 import wx from "../configs/wx.js";
@@ -102,4 +102,59 @@ const login = async (req, res) => {
   }
 };
 
-export { login };
+const getInfo = async (req, res) => {
+  try {
+    logger.info("/api/getInfo");
+    const third_session = req.query.third_session;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      logger.debug(`openid: ${openid}`);
+      // 实现具体逻辑
+
+      let nickname = null;
+      let info_dot = null;
+      // 查找用户nickname
+      await User.findOne({ where: { openid: openid } }).then((user) => {
+        nickname = user.nickname;
+      });
+      // 判断是否有未处理的信息
+      await Information.findOne({
+        where: {
+          openid: openid,
+          is_handle: false,
+        },
+      }).then((info) => {
+        if (info) {
+          info_dot = true;
+        } else {
+          info_dot = false;
+        }
+      });
+
+      logger.debug(`nickname: ${nickname}`);
+      logger.debug(`info_dot: ${info_dot}`);
+
+      res.status(200).json({
+        message: "Get info successful",
+        nickname: nickname,
+        info_dot: info_dot,
+      });
+    }
+  } catch (error) {
+    logger.error(`Error get info: ${error}`);
+    res.status(500).json({ message: "Failed to login" });
+  }
+};
+
+export { login, getInfo };
