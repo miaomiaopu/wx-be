@@ -90,9 +90,14 @@ const getCheckinWithThirdSession = async (req, res) => {
       }).then((checkins) => {
         // 处理查询结果
         logger.debug(`checkins: ${checkins}`);
+        let updateCheckin = []
+        for (let index = 0; index < checkins.length; index++) {
+          updateCheckin.push(checkins[index].check_date)
+        }
+        console.log(updateCheckin)
         res
           .status(200)
-          .json({ message: "Get check-ins successful", checkins: checkins });
+          .json({ message: "Get check-ins successful", checkins: updateCheckin });
       });
     }
   } catch (error) {
@@ -101,4 +106,63 @@ const getCheckinWithThirdSession = async (req, res) => {
   }
 };
 
-export { getDataListWithThirdSession, getCheckinWithThirdSession };
+const checkinWithThirdSession = async (req, res) => {
+  try {
+    logger.info("/api/checkin");
+    const { third_session } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      logger.debug(`openid: ${openid}`);
+      // 实现具体逻辑, 查询今日是否已经签到，如果未签到则返回 201，并且添加签到信息；否则返回 200，已经钱都
+
+      const today = new Date();
+      let checkinToday = null;
+      await Checkin.findOne({
+        where: {
+          openid: openid,
+          check_date: {
+            [Op.gte]: new Date(
+              today.getFullYear(),
+              today.getMonth(),
+              today.getDate()
+            ),
+          },
+        },
+      }).then((result) => {
+        if (result) {
+          checkinToday = result;
+        }
+      });
+
+      if (checkinToday) {
+        res.status(200).json({ message: "Already checked in today" });
+      } else {
+        await Checkin.create({
+          openid: openid,
+          check_date: today,
+        });
+        res.status(201).json({ message: "Checkin successful" });
+      }
+    }
+  } catch (error) {
+    logger.error(`Error checkin: ${error}`);
+    res.status(500).json({ message: "Failed to checkin" });
+  }
+};
+
+export {
+  getDataListWithThirdSession,
+  getCheckinWithThirdSession,
+  checkinWithThirdSession,
+};
