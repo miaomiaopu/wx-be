@@ -89,12 +89,11 @@ const getCheckinWithThirdSession = async (req, res) => {
         },
       }).then((checkins) => {
         // 处理查询结果
-        logger.debug(`checkins: ${checkins}`);
         let updateCheckin = []
         for (let index = 0; index < checkins.length; index++) {
           updateCheckin.push(checkins[index].check_date)
         }
-        console.log(updateCheckin)
+        logger.debug(`checkins: ${updateCheckin}`);
         res
           .status(200)
           .json({ message: "Get check-ins successful", checkins: updateCheckin });
