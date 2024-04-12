@@ -8,6 +8,12 @@ import getAccessToken from "./utils/getAccessToken.js";
 import redisPool from "./configs/redis.js";
 import dataRouter from "./routes/dataRoutes.js";
 import informationRouter from "./routes/informationRoutes.js";
+import themeRouter from "./routes/themeRoutes.js";
+
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -29,6 +35,9 @@ redisPool
 // 使用 Pino 日志
 // app.use(pinoMiddleware);
 
+// 开放 public
+app.use(express.static(join(__dirname, "public")));
+
 // 使用中间件解析请求体
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,7 +47,9 @@ app.use("/api", userRouter);
 // 数据路由
 app.use("/api", dataRouter);
 // 消息路由
-app.use("/api", informationRouter)
+app.use("/api", informationRouter);
+// 主题路由
+app.use("/api", themeRouter);
 
 // 统一错误处理
 app.use(errorHandler);

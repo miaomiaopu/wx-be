@@ -22,13 +22,27 @@ wx-be
    ├─ configs
    │  ├─ database.js
    │  ├─ logger.js
-   │  └─ redis.js
+   │  ├─ redis.js
+   │  └─ upload.js
    ├─ controllers
-   │  └─ userControllers.js
+   │  ├─ dataController.js
+   │  ├─ informationController.js
+   │  ├─ themeController.js
+   │  └─ userController.js
    ├─ middlewares
    │  ├─ errorHandler.js
    │  └─ pinoMiddleware.js
    ├─ models
+   │  ├─ Checkin.js
+   │  ├─ Data.js
+   │  ├─ index.js
+   │  ├─ Information.js
+   │  ├─ Tag.js
+   │  ├─ Theme.js
+   │  ├─ ThemeTagConnection.js
    │  └─ User.js
    └─ utils
+      ├─ generateThirdSession.js
+      └─ getAccessToken.js
+
 ```
