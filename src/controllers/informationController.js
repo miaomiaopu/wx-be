@@ -1,6 +1,6 @@
 import redisPool from "../configs/redis.js";
 import logger from "../configs/logger.js";
-import Information from "../models/Information.js";
+import { Information } from "../models/index.js";
 
 const getInformations = async (req, res) => {
   try {
@@ -120,7 +120,10 @@ const handleAllInformations = async (req, res) => {
       logger.debug(`openid: ${openid}`);
       // 实现具体逻辑
 
-      await Information.update({ is_handle: true }, { where: { openid: openid } });
+      await Information.update(
+        { is_handle: true },
+        { where: { openid: openid } }
+      );
       res.status(200).json({
         message: "Change informations successful",
       });
@@ -177,6 +180,11 @@ const getInfoDot = async (req, res) => {
     logger.error(`Error get info dot: ${error}`);
     res.status(500).json({ message: "Failed to info dot" });
   }
-}
+};
 
-export { getInformations, handleInformation, handleAllInformations, getInfoDot };
+export {
+  getInformations,
+  handleInformation,
+  handleAllInformations,
+  getInfoDot,
+};
