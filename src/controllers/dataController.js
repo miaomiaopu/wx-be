@@ -1,3 +1,4 @@
+import sequelize from "../configs/database.js";
 import logger from "../configs/logger.js";
 import redisPool from "../configs/redis.js";
 import { Data, Checkin } from "../models/index.js";
@@ -89,14 +90,15 @@ const getCheckinWithThirdSession = async (req, res) => {
         },
       }).then((checkins) => {
         // 处理查询结果
-        let updateCheckin = []
+        let updateCheckin = [];
         for (let index = 0; index < checkins.length; index++) {
-          updateCheckin.push(checkins[index].check_date)
+          updateCheckin.push(checkins[index].check_date);
         }
         logger.debug(`checkins: ${updateCheckin}`);
-        res
-          .status(200)
-          .json({ message: "Get check-ins successful", checkins: updateCheckin });
+        res.status(200).json({
+          message: "Get check-ins successful",
+          checkins: updateCheckin,
+        });
       });
     }
   } catch (error) {
@@ -151,6 +153,17 @@ const checkinWithThirdSession = async (req, res) => {
           openid: openid,
           check_date: today,
         });
+        // 增加总签到天数
+        await Data.update(
+          {
+            total_check_ins: sequelize.literal("total_check_ins + 1"),
+          },
+          {
+            where: {
+              openid: openid,
+            },
+          }
+        );
         res.status(201).json({ message: "Checkin successful" });
       }
     }
