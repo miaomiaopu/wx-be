@@ -11,6 +11,7 @@ import CardLikeConnection from "./CardLikeConnection.js";
 import CardPicture from "./CardPicture.js";
 import CardStudyTime from "./CardStudyTime.js";
 import Comment from "./Comment.js";
+import ThemeCardConnection from "./ThemeCardConnection.js";
 
 export {
   User,
@@ -26,4 +27,5 @@ export {
   CardPicture,
   CardStudyTime,
   Comment,
+  ThemeCardConnection,
 };
