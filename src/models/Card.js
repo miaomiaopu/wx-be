@@ -11,11 +11,6 @@ const Card = sequelize.define(
       allowNull: false,
       comment: "卡片唯一标识",
     },
-    theme_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      comment: "主题唯一标识-外键",
-    },
     card_title: {
       type: DataTypes.STRING(128),
       allowNull: false,
