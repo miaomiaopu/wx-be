@@ -7,11 +7,13 @@ const ThemeCardConnection = sequelize.define(
     theme_id: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
+      primaryKey: true,
       comment: "主题唯一标识-外键",
     },
     card_id: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
+      primaryKey: true,
       comment: "卡片唯一标识-外键",
     },
   },

@@ -7,11 +7,13 @@ const ThemeSubscriberConnection = sequelize.define(
     theme_id: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
+      primaryKey: true,
       comment: "主题唯一标识-外键",
     },
     openid: {
       type: DataTypes.STRING(28),
       allowNull: false,
+      primaryKey: true,
       comment: "用户唯一标识-外键",
     },
   },
