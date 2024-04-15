@@ -339,9 +339,6 @@ const deleteMyTheme = async (req, res) => {
           tagIds = result.map((res) => res.tag_id);
         });
 
-      console.log(theme_id);
-      console.log(tagIds);
-
       deleteImage(theme.theme_picture);
 
       await Promise.all([
@@ -372,10 +369,121 @@ const deleteMyTheme = async (req, res) => {
   }
 };
 
+const upTheme = async (openid, theme_id, tags, themeName, theme_picture) => {
+  // 更新主题
+  let theme = null;
+  let old_picture = null;
+
+  await Theme.findOne({
+    where: {
+      theme_id: theme_id,
+    },
+  }).then((result) => {
+    theme = result;
+    if (!theme) {
+      throw new Error("Theme not found");
+    }
+
+    theme.theme_name = themeName;
+    if (theme_picture) {
+      old_picture = theme.theme_picture;
+      theme.theme_picture = theme_picture;
+    }
+
+    theme.save();
+  });
+
+  let tagIds = [];
+  await sequelize
+    .query(
+      `
+    select tag_id
+    from theme_tag_conn
+    where theme_id = :theme_id and tag_id in (select tag_id from theme_tag_conn group by tag_id having count(*) = 1);
+    `,
+      {
+        type: QueryTypes.SELECT,
+        raw: true,
+        replacements: { theme_id: theme_id },
+      }
+    )
+    .then((result) => {
+      tagIds = result.map((res) => res.tag_id);
+    });
+
+  await Promise.all([
+    Tag.destroy({
+      where: {
+        tag_id: tagIds,
+      },
+    }),
+    ThemeTagConnection.destroy({
+      where: {
+        theme_id: theme_id,
+      },
+    }),
+  ]);
+
+  // 先查找旧的 Tags
+  if (tags) {
+    createTags(tags, theme_id);
+  }
+
+  return old_picture;
+};
+
+const updateTheme = async (req, res) => {
+  try {
+    logger.info("/api/updateTheme or /api/updateThemeWithoutPicture");
+    // 获取openid，处理图片逻辑，默认图片(public/images/default-image.jpg)，处理标签逻辑
+
+    let theme_picture = null;
+    if (req.file) {
+      theme_picture = "http://localhost:8000/images/" + req.file.filename;
+    }
+
+    const { third_session, themeName, theme_id } = req.body;
+    let tags = null;
+    if (!theme_picture) {
+      tags = req.body.tags;
+    } else {
+      tags = JSON.parse(req.body.tags);
+    }
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      const old_picture = await upTheme(
+        openid,
+        theme_id,
+        tags,
+        themeName,
+        theme_picture
+      );
+      console.log(old_picture);
+      deleteImage(old_picture);
+      res.status(200).json({ message: "Successful update theme" });
+    }
+  } catch (error) {
+    logger.error(`Error update theme: ${error}`);
+    res.status(500).json({ message: "Fail to update theme" });
+  }
+};
+
 export {
   createThemeWithoutPicture,
   createThemeWithPicture,
   getMyThemeAndSubTheme,
   cancelSubTheme,
   deleteMyTheme,
+  updateTheme,
 };

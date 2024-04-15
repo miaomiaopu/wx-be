@@ -9,6 +9,9 @@ const __dirname = dirname(__filename);
 const directory = join(__dirname, "..", "public", "images");
 
 const deleteImage = (imageUrl) => {
+  if (!imageUrl) {
+    return;
+  }
   const fileName = basename(imageUrl);
   if (fileName !== "default-image.jpg") {
     // 删除文件
