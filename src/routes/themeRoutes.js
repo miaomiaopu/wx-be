@@ -4,6 +4,8 @@ import {
   createThemeWithPicture,
   createThemeWithoutPicture,
   getMyThemeAndSubTheme,
+  cancelSubTheme,
+  deleteMyTheme
 } from "../controllers/themeController.js";
 
 const themeRouter = express.Router();
@@ -15,5 +17,7 @@ themeRouter.post(
   createThemeWithPicture
 );
 themeRouter.get("/getMyThemeAndSubTheme", getMyThemeAndSubTheme);
+themeRouter.post("/cancelSubTheme", cancelSubTheme)
+themeRouter.post("/deleteMyTheme", deleteMyTheme)
 
 export default themeRouter;

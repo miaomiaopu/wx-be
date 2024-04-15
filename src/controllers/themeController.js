@@ -3,10 +3,15 @@ import sequelize from "../configs/database.js";
 import logger from "../configs/logger.js";
 import redisPool from "../configs/redis.js";
 import {
+  Information,
   Tag,
   Theme,
+  ThemeCardConnection,
+  ThemeSubscriberConnection,
   ThemeTagConnection,
 } from "../models/index.js";
+import { deleteByCardIds } from "../utils/deleteByCardIds.js";
+import deleteImage from "../utils/deleteImage.js";
 
 const createTags = async (tags, theme_id) => {
   let tagIds = [];
@@ -193,8 +198,6 @@ const getMyThemeAndSubTheme = async (req, res) => {
         sub_themes = generateThemeResult(sub_themes);
       }
 
-      console.log(my_themes);
-
       res.status(200).json({
         message: "Successful get theme",
         my_themes: my_themes,
@@ -207,8 +210,172 @@ const getMyThemeAndSubTheme = async (req, res) => {
   }
 };
 
+const cancelSubTheme = async (req, res) => {
+  try {
+    logger.info("/api/cancelSubTheme");
+
+    const { third_session, theme_id } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      // 处理具体逻辑
+      // 根据 theme_id 和 openid删除
+      await ThemeSubscriberConnection.destroy({
+        where: {
+          theme_id: theme_id,
+          openid: openid,
+        },
+      });
+
+      res.status(200).json({
+        message: "Successful delete sub theme",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error delete sub theme:" ${error}`);
+    res.status(500).json({ message: "Fail to delete sub theme" });
+  }
+};
+
+const deleteMyTheme = async (req, res) => {
+  try {
+    logger.info("/api/deleteMyTheme");
+
+    const { third_session, theme_id } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    // 获取 theme
+    let theme = null;
+    await Theme.findOne({
+      where: {
+        theme_id: theme_id,
+      },
+    }).then((result) => {
+      theme = result;
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      // 处理具体逻辑
+      // 获取 card_ids
+      let cardIds = [];
+      await ThemeCardConnection.findAll({
+        where: {
+          theme_id: theme_id,
+        },
+      }).then((result) => {
+        cardIds = result.map((connection) => connection.card_id);
+      });
+
+      // 根据 theme_id 删除对应的 card, theme_card_connect
+      // 根据 card_id 删除对应的 study_time, like, comment, picture
+      // 删除对应图片
+
+      await deleteByCardIds(cardIds);
+
+      // 发送信息给订阅了的用户 informations
+      let openidSubs = [];
+      await ThemeSubscriberConnection.findAll({
+        where: {
+          theme_id: theme_id,
+        },
+      }).then((result) => {
+        openidSubs = result.map((connection) => connection.openid);
+      });
+
+      const message = `您订阅的 ${theme.theme_id}-${theme.theme_name} 被作者删除`;
+
+      await Promise.all(
+        openidSubs.map((openid) => {
+          return Information.create({
+            openid: openid,
+            message: message,
+          });
+        })
+      );
+      // 删除对应的订阅记录 theme_subscriber_conn, 对应的 tag, theme
+      await ThemeSubscriberConnection.destroy({
+        where: {
+          theme_id: theme_id,
+        },
+      });
+
+      // 先判断tag是否被其他的主题使用，没有就删除tag
+
+      let tagIds = [];
+      await sequelize
+        .query(
+          `
+        select tag_id
+        from theme_tag_conn
+        where theme_id = :theme_id and tag_id in (select tag_id from theme_tag_conn group by tag_id having count(*) = 1);
+        `,
+          {
+            type: QueryTypes.SELECT,
+            raw: true,
+            replacements: { theme_id: theme_id },
+          }
+        )
+        .then((result) => {
+          tagIds = result.map((res) => res.tag_id);
+        });
+
+      console.log(theme_id);
+      console.log(tagIds);
+
+      deleteImage(theme.theme_picture);
+
+      await Promise.all([
+        Tag.destroy({
+          where: {
+            tag_id: tagIds,
+          },
+        }),
+        ThemeTagConnection.destroy({
+          where: {
+            theme_id: theme_id,
+          },
+        }),
+        Theme.destroy({
+          where: {
+            theme_id: theme_id,
+          },
+        }),
+      ]);
+
+      res.status(200).json({
+        message: "Successful delete my theme",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error delete my theme:" ${error}`);
+    res.status(500).json({ message: "Fail to delete my theme" });
+  }
+};
+
 export {
   createThemeWithoutPicture,
   createThemeWithPicture,
   getMyThemeAndSubTheme,
+  cancelSubTheme,
+  deleteMyTheme,
 };
