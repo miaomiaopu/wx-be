@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize";
 const sequelize = new Sequelize("wxzk", "root", "wxzk", {
   host: "localhost",
   dialect: "mariadb",
+  timezone: '+08:00',
   port: 13306,
   alter: false,
   logging: false,
