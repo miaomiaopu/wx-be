@@ -22,7 +22,7 @@ const Theme = sequelize.define(
       comment: "主题名称",
     },
     theme_picture: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(512),
       allowNull: false,
       defaultValue: "http://localhost:8000/images/default-image.jpg",
       comment: "主题图片url",

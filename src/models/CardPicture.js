@@ -12,7 +12,7 @@ const CardPicture = sequelize.define(
       comment: "卡片内容图片唯一标识",
     },
     picture: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(512),
       allowNull: false,
       comment: "卡片图片url",
     },
