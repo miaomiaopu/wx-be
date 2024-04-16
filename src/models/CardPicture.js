@@ -7,7 +7,6 @@ const CardPicture = sequelize.define(
     card_picture_id: {
       type: DataTypes.INTEGER.UNSIGNED,
       primaryKey: true,
-      autoIncrement: true,
       allowNull: false,
       comment: "卡片内容图片唯一标识",
     },
@@ -18,6 +17,7 @@ const CardPicture = sequelize.define(
     },
     card_id: {
       type: DataTypes.INTEGER.UNSIGNED,
+      primaryKey: true,
       allowNull: false,
       comment: "卡片唯一标识-外键",
     },
