@@ -12,6 +12,7 @@ import themeRouter from "./routes/themeRoutes.js";
 
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import cardRouter from "./routes/cardRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -50,6 +51,8 @@ app.use("/api", dataRouter);
 app.use("/api", informationRouter);
 // 主题路由
 app.use("/api", themeRouter);
+// 卡片路由
+app.use("/api", cardRouter)
 
 // 统一错误处理
 app.use(errorHandler);
