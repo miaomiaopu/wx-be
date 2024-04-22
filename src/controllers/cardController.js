@@ -3,6 +3,7 @@ import { QueryTypes } from "sequelize";
 import logger from "../configs/logger.js";
 import redisPool from "../configs/redis.js";
 import { Card, CardPicture, ThemeCardConnection } from "../models/index.js";
+import { deleteByCardId } from "../utils/deleteByCardIds.js";
 
 const getAuthorAndCards = async (req, res) => {
   try {
@@ -263,9 +264,38 @@ const getCard = async (req, res) => {
   }
 };
 
+const deleteCard = async (req, res) => {
+  try {
+    logger.info("/api/deleteCard");
+
+    const { third_session, card_id } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      await deleteByCardId(card_id);
+
+      res.status(200).json({ message: "Delete card successful" });
+    }
+  } catch (error) {
+    logger.error(`Error create card: ${error}`);
+    res.status(500).json({ message: "Fail to delete card" });
+  }
+};
+
 export {
   getAuthorAndCards,
   createCardWithPicture,
   createCardWithoutPicture,
   getCard,
+  deleteCard,
 };

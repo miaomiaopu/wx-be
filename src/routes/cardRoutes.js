@@ -5,6 +5,7 @@ import {
   createCardWithPicture,
   createCardWithoutPicture,
   getCard,
+  deleteCard
 } from "../controllers/cardController.js";
 
 const cardRouter = express.Router();
@@ -17,5 +18,6 @@ cardRouter.post(
 );
 cardRouter.post("/createCardWithoutPicture", createCardWithoutPicture);
 cardRouter.get("/getCard", getCard);
+cardRouter.post("/deleteCard", deleteCard)
 
 export default cardRouter;
