@@ -237,6 +237,18 @@ const cancelSubTheme = async (req, res) => {
         },
       });
 
+      // 减少订阅数
+      await Theme.update(
+        {
+          total_subscription: sequelize.literal("total_subscription - 1"),
+        },
+        {
+          where: {
+            theme_id: theme_id,
+          },
+        }
+      );
+
       res.status(200).json({
         message: "Successful delete sub theme",
       });
@@ -479,6 +491,118 @@ const updateTheme = async (req, res) => {
   }
 };
 
+const searchTheme = async (req, res) => {
+  // 需要未被订阅的，title符合关键词，tag符合关键词
+  try {
+    logger.info("/api/searchTheme");
+
+    const third_session = req.query.third_session;
+    const search = `%${req.query.search}%`;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      // 处理 title 的具体逻辑
+      let res_themes = [];
+      await sequelize
+        .query(
+          `
+          SELECT
+            themes.theme_id,
+            theme_name,
+            theme_picture,
+            total_subscription,
+            COALESCE(GROUP_CONCAT(tag_name), '') AS 'tags'
+          FROM themes
+          LEFT JOIN theme_tag_conn ON themes.theme_id = theme_tag_conn.theme_id
+          LEFT JOIN tags ON theme_tag_conn.tag_id = tags.tag_id
+          WHERE
+            openid <> :openid
+            AND themes.theme_id NOT IN (SELECT theme_id FROM theme_subscriber_conn WHERE openid = :openid)     -- 未被该用户订阅
+            AND (theme_name LIKE :search OR themes.theme_id IN (SELECT theme_id FROM theme_tag_conn WHERE tag_id IN (SELECT tag_id FROM tags WHERE tag_name LIKE :search))) -- 含有特定标签
+          GROUP BY themes.theme_id;
+        `,
+          {
+            type: QueryTypes.SELECT,
+            raw: true,
+            replacements: { openid: openid, search: search },
+          }
+        )
+        .then((result) => {
+          res_themes = result;
+        });
+
+      if (res_themes) {
+        res_themes = generateThemeResult(res_themes);
+      }
+
+      res.status(200).json({
+        message: "Successful get theme",
+        res_themes: res_themes,
+      });
+    }
+  } catch (error) {
+    logger.error(`Error get theme: ${error}`);
+    res.status(500).json({ message: "Fail to get theme" });
+  }
+};
+
+const subTheme = async (req, res) => {
+  try {
+    logger.info("/api/subTheme");
+
+    const { third_session, theme_id } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      // 处理具体逻辑
+
+      await ThemeSubscriberConnection.create({
+        theme_id: theme_id,
+        openid: openid,
+      });
+
+      // 增加订阅数
+      await Theme.update(
+        {
+          total_subscription: sequelize.literal("total_subscription + 1"),
+        },
+        {
+          where: {
+            theme_id: theme_id,
+          },
+        }
+      );
+
+      res.status(201).json({
+        message: "Successful sub theme",
+      });
+    }
+  } catch (error) {
+    logger.error(`Error sub theme:" ${error}`);
+    res.status(500).json({ message: "Fail to sub theme" });
+  }
+};
+
 export {
   createThemeWithoutPicture,
   createThemeWithPicture,
@@ -486,4 +610,6 @@ export {
   cancelSubTheme,
   deleteMyTheme,
   updateTheme,
+  searchTheme,
+  subTheme,
 };
