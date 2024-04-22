@@ -4,6 +4,7 @@ import {
   getAuthorAndCards,
   createCardWithPicture,
   createCardWithoutPicture,
+  getCard,
 } from "../controllers/cardController.js";
 
 const cardRouter = express.Router();
@@ -15,5 +16,6 @@ cardRouter.post(
   createCardWithPicture
 );
 cardRouter.post("/createCardWithoutPicture", createCardWithoutPicture);
+cardRouter.get("/getCard", getCard);
 
 export default cardRouter;

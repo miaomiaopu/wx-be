@@ -177,4 +177,95 @@ const createCardWithoutPicture = async (req, res) => {
   }
 };
 
-export { getAuthorAndCards, createCardWithPicture, createCardWithoutPicture };
+const getCard = async (req, res) => {
+  try {
+    logger.info("/api/getCard");
+
+    const third_session = req.query.third_session;
+    const card_id = req.query.card_id;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      let str1 = "",
+        str2 = "",
+        str3 = "",
+        str4 = "",
+        image1 = "",
+        image2 = "",
+        image3 = "";
+
+      // 获取card_content
+      let content = "";
+      await Card.findOne({ where: { card_id: card_id } }).then((result) => {
+        content = result.card_content;
+      });
+
+      const regex = /<i>\d<i>/g;
+
+      const str = content.split(regex);
+
+      for (let index = 0; index < str.length; index++) {
+        const element = str[index];
+        if (index == 0) {
+          str1 = element;
+        } else if (index == 1) {
+          str2 = element;
+        } else if (index == 2) {
+          str3 = element;
+        } else if (index == 3) {
+          str4 = element;
+        }
+      }
+
+      let images = [];
+      await CardPicture.findAll({
+        where: { card_id: card_id },
+        order: [["card_picture_id", "ASC"]],
+      }).then((result) => {
+        images = result.map((res) => res.picture);
+      });
+
+      for (let index = 0; index < images.length; index++) {
+        const element = images[index];
+        if (index == 0) {
+          image1 = element;
+        } else if (index == 1) {
+          image2 = element;
+        } else if (index == 2) {
+          image3 = element;
+        }
+      }
+
+      res.status(200).json({
+        message: "get card successful",
+        str1: str1,
+        str2: str2,
+        str3: str3,
+        str4: str4,
+        image1: image1,
+        image2: image2,
+        image3: image3,
+      });
+    }
+  } catch (error) {
+    logger.error(`Error get card: ${error}`);
+    res.status(500).json({ message: "Fail to get card" });
+  }
+};
+
+export {
+  getAuthorAndCards,
+  createCardWithPicture,
+  createCardWithoutPicture,
+  getCard,
+};
