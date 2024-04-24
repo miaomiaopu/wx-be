@@ -12,6 +12,7 @@ import {
 } from "../models/index.js";
 import { deleteByCardIds } from "../utils/deleteByCardIds.js";
 import deleteImage from "../utils/deleteImage.js";
+import { sendThemeChange } from "../utils/sendMessage.js";
 
 const createTags = async (tags, theme_id) => {
   let tagIds = [];
@@ -305,25 +306,9 @@ const deleteMyTheme = async (req, res) => {
       await deleteByCardIds(cardIds);
 
       // 发送信息给订阅了的用户 informations
-      let openidSubs = [];
-      await ThemeSubscriberConnection.findAll({
-        where: {
-          theme_id: theme_id,
-        },
-      }).then((result) => {
-        openidSubs = result.map((connection) => connection.openid);
-      });
 
-      const message = `您订阅的 ${theme.theme_id}-${theme.theme_name} 被作者删除`;
+      await sendThemeChange(theme_id, 1);
 
-      await Promise.all(
-        openidSubs.map((openid) => {
-          return Information.create({
-            openid: openid,
-            message: message,
-          });
-        })
-      );
       // 删除对应的订阅记录 theme_subscriber_conn, 对应的 tag, theme
       await ThemeSubscriberConnection.destroy({
         where: {
@@ -483,6 +468,8 @@ const updateTheme = async (req, res) => {
       );
       console.log(old_picture);
       deleteImage(old_picture);
+
+      await sendThemeChange(theme_id, 0);
       res.status(200).json({ message: "Successful update theme" });
     }
   } catch (error) {
@@ -603,6 +590,56 @@ const subTheme = async (req, res) => {
   }
 };
 
+const getBelongAndSub = async (req, res) => {
+  try {
+    logger.info("/api/getAuthorAndCards");
+
+    const third_session = req.query.third_session;
+    const theme_id = req.query.theme_id;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      let belongString = 0;
+      let substring = 0;
+
+      await Theme.findOne({
+        where: { openid: openid, theme_id: theme_id },
+      }).then((res) => {
+        if (res) {
+          belongString = 1;
+        }
+      });
+
+      await ThemeSubscriberConnection.findOne({
+        where: { openid: openid, theme_id: theme_id },
+      }).then((res) => {
+        if (res) {
+          substring = 1;
+        }
+      });
+
+      res.status(200).json({
+        message: "get author and cards successful",
+        belongString: belongString,
+        substring: substring,
+      });
+    }
+  } catch (error) {
+    logger.error(`Error get author and cards: ${error}`);
+    res.status(500).json({ message: "Fail to get author and cards" });
+  }
+};
+
 export {
   createThemeWithoutPicture,
   createThemeWithPicture,
@@ -612,4 +649,5 @@ export {
   updateTheme,
   searchTheme,
   subTheme,
+  getBelongAndSub,
 };

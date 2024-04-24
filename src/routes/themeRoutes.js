@@ -9,6 +9,7 @@ import {
   updateTheme,
   searchTheme,
   subTheme,
+  getBelongAndSub,
 } from "../controllers/themeController.js";
 
 const themeRouter = express.Router();
@@ -26,5 +27,6 @@ themeRouter.post("/updateTheme", upload.single("theme_picture"), updateTheme);
 themeRouter.post("/updateThemeWithoutPicture", updateTheme);
 themeRouter.get("/searchTheme", searchTheme);
 themeRouter.post("/subTheme", subTheme);
+themeRouter.get("/getBelongAndSub", getBelongAndSub);
 
 export default themeRouter;

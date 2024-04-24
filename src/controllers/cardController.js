@@ -4,6 +4,7 @@ import logger from "../configs/logger.js";
 import redisPool from "../configs/redis.js";
 import { Card, CardPicture, ThemeCardConnection } from "../models/index.js";
 import { deleteByCardId } from "../utils/deleteByCardIds.js";
+import { sendCardChange } from "../utils/sendMessage.js";
 
 const getAuthorAndCards = async (req, res) => {
   try {
@@ -128,6 +129,8 @@ const createCardWithPicture = async (req, res) => {
           card_id: card_id,
         });
 
+        await sendCardChange(card_id, 0);
+
         res
           .status(201)
           .json({ message: "Create card successful", card_id: card_id });
@@ -169,6 +172,8 @@ const createCardWithoutPicture = async (req, res) => {
         theme_id: theme_id,
         card_id: card_id,
       });
+
+      await sendCardChange(card_id, 0);
 
       res.status(201).json({ message: "Create card successful" });
     }
@@ -283,6 +288,7 @@ const deleteCard = async (req, res) => {
       res.status(404).json({ message: "Third session key not found" });
     } else {
       await deleteByCardId(card_id);
+      await sendCardChange(card_id, 1);
 
       res.status(200).json({ message: "Delete card successful" });
     }
