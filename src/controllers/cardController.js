@@ -2,7 +2,12 @@ import sequelize from "../configs/database.js";
 import { QueryTypes } from "sequelize";
 import logger from "../configs/logger.js";
 import redisPool from "../configs/redis.js";
-import { Card, CardPicture, ThemeCardConnection } from "../models/index.js";
+import {
+  Card,
+  CardLikeConnection,
+  CardPicture,
+  ThemeCardConnection,
+} from "../models/index.js";
 import { deleteByCardId } from "../utils/deleteByCardIds.js";
 import { sendCardChange } from "../utils/sendMessage.js";
 
@@ -298,10 +303,113 @@ const deleteCard = async (req, res) => {
   }
 };
 
+const isLike = async (req, res) => {
+  try {
+    logger.info("/api/isLike");
+
+    const { third_session, card_id } = req.query;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      let is_like = false;
+      await CardLikeConnection.findOne({
+        where: {
+          card_id: card_id,
+          openid: openid,
+        },
+      }).then((res) => {
+        if (res) {
+          is_like = true;
+        }
+      });
+
+      res
+        .status(200)
+        .json({ message: "Like card successful", is_like: is_like });
+    }
+  } catch (error) {
+    logger.error(`Error create card: ${error}`);
+    res.status(500).json({ message: "Fail to like card" });
+  }
+};
+
+const likeCard = async (req, res) => {
+  try {
+    logger.info("/api/likeCard");
+
+    const { third_session, card_id } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      await CardLikeConnection.create({ card_id: card_id, openid: openid });
+
+      res.status(201).json({ message: "Like card successful" });
+    }
+  } catch (error) {
+    logger.error(`Error create card: ${error}`);
+    res.status(500).json({ message: "Fail to like card" });
+  }
+};
+
+const unlikeCard = async (req, res) => {
+  try {
+    logger.info("/api/unlikeCard");
+
+    const { third_session, card_id } = req.body;
+
+    let openid = null;
+    await redisPool.get(third_session, (err, result) => {
+      if (err) {
+        logger.error(`Redis error: ${err}`);
+      } else {
+        openid = result;
+      }
+    });
+
+    if (!openid) {
+      res.status(404).json({ message: "Third session key not found" });
+    } else {
+      await CardLikeConnection.destroy({
+        where: {
+          card_id: card_id,
+          openid: openid,
+        },
+      });
+      res.status(200).json({ message: "Unlike card successful" });
+    }
+  } catch (error) {
+    logger.error(`Error create card: ${error}`);
+    res.status(500).json({ message: "Fail to unlike card" });
+  }
+};
+
 export {
   getAuthorAndCards,
   createCardWithPicture,
   createCardWithoutPicture,
   getCard,
   deleteCard,
+  isLike,
+  likeCard,
+  unlikeCard,
 };
