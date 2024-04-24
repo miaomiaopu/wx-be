@@ -1,4 +1,4 @@
-import { Card, Information, Theme, ThemeCardConnection } from "../models";
+import { Card, Information, Theme, ThemeCardConnection } from "../models/index.js";
 
 const sendThemeChange = async (theme_id, changeOrDelete) => {
   let openids = [];
