@@ -13,6 +13,7 @@ import themeRouter from "./routes/themeRoutes.js";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import cardRouter from "./routes/cardRoutes.js";
+import commentRouter from "./routes/commentRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -52,7 +53,9 @@ app.use("/api", informationRouter);
 // 主题路由
 app.use("/api", themeRouter);
 // 卡片路由
-app.use("/api", cardRouter)
+app.use("/api", cardRouter);
+// 评论路由
+app.use("/api", commentRouter);
 
 // 统一错误处理
 app.use(errorHandler);
