@@ -217,8 +217,11 @@ const getCard = async (req, res) => {
 
       // 获取card_content
       let content = "";
+      let card_modified_date = ""
       await Card.findOne({ where: { card_id: card_id } }).then((result) => {
         content = result.card_content;
+        const date = result.card_modified_date
+        card_modified_date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}`
       });
 
       const regex = /<i>\d<i>/g;
@@ -266,6 +269,7 @@ const getCard = async (req, res) => {
         image1: image1,
         image2: image2,
         image3: image3,
+        card_modified_date: card_modified_date
       });
     }
   } catch (error) {
@@ -335,11 +339,11 @@ const isLike = async (req, res) => {
 
       res
         .status(200)
-        .json({ message: "Like card successful", is_like: is_like });
+        .json({ message: "Is like card successful", is_like: is_like });
     }
   } catch (error) {
-    logger.error(`Error create card: ${error}`);
-    res.status(500).json({ message: "Fail to like card" });
+    logger.error(`Error Is like card: ${error}`);
+    res.status(500).json({ message: "Fail to is like card" });
   }
 };
 
@@ -366,7 +370,7 @@ const likeCard = async (req, res) => {
       res.status(201).json({ message: "Like card successful" });
     }
   } catch (error) {
-    logger.error(`Error create card: ${error}`);
+    logger.error(`Error like card: ${error}`);
     res.status(500).json({ message: "Fail to like card" });
   }
 };
@@ -398,7 +402,7 @@ const unlikeCard = async (req, res) => {
       res.status(200).json({ message: "Unlike card successful" });
     }
   } catch (error) {
-    logger.error(`Error create card: ${error}`);
+    logger.error(`Error unlike card: ${error}`);
     res.status(500).json({ message: "Fail to unlike card" });
   }
 };
