@@ -22,6 +22,12 @@ const CardStudyTime = sequelize.define(
       allowNull: true,
       comment: "上次学习的时间",
     },
+    phase: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+      comment: "学习阶段"
+    }
   },
   {
     tableName: "card_study_time",

@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import cardRouter from "./routes/cardRoutes.js";
 import commentRouter from "./routes/commentRoutes.js";
+import studyRouter from "./routes/studyRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -56,6 +57,8 @@ app.use("/api", themeRouter);
 app.use("/api", cardRouter);
 // 评论路由
 app.use("/api", commentRouter);
+// 学习路由
+app.use("/api", studyRouter);
 
 // 统一错误处理
 app.use(errorHandler);
