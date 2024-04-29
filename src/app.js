@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cron from "node-cron";
 import sequelize from "./configs/database.js";
 import logger from "./configs/logger.js";
 import userRouter from "./routes/userRoutes.js";
@@ -15,6 +16,7 @@ import { dirname, join } from "path";
 import cardRouter from "./routes/cardRoutes.js";
 import commentRouter from "./routes/commentRoutes.js";
 import studyRouter from "./routes/studyRoutes.js";
+import setTodayToZero from "./utils/setTodayToZero.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -79,3 +81,8 @@ sequelize
   });
 
 getAccessToken();
+setTodayToZero();
+
+cron.schedule("59 11 * * *", () => {
+  setTodayToZero();
+});
