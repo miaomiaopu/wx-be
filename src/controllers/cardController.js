@@ -123,7 +123,7 @@ const createCardWithPicture = async (req, res) => {
           card_id = result.card_id;
         });
 
-        ThemeCardConnection.create({
+        await ThemeCardConnection.create({
           theme_id: theme_id,
           card_id: card_id,
         });
@@ -296,13 +296,13 @@ const deleteCard = async (req, res) => {
     if (!openid) {
       res.status(404).json({ message: "Third session key not found" });
     } else {
-      await deleteByCardId(card_id);
       await sendCardChange(card_id, 1);
+      await deleteByCardId(card_id);
 
       res.status(200).json({ message: "Delete card successful" });
     }
   } catch (error) {
-    logger.error(`Error create card: ${error}`);
+    logger.error(`Error delete card: ${error}`);
     res.status(500).json({ message: "Fail to delete card" });
   }
 };

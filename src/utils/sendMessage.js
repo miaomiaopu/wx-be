@@ -1,4 +1,4 @@
-import { Card, Information, Theme, ThemeCardConnection } from "../models/index.js";
+import { Card, Information, Theme, ThemeCardConnection, ThemeSubscriberConnection } from "../models/index.js";
 
 const sendThemeChange = async (theme_id, changeOrDelete) => {
   let openids = [];
@@ -9,7 +9,7 @@ const sendThemeChange = async (theme_id, changeOrDelete) => {
     message = `您订阅的主题: ${theme_id} 被作者删除`;
   }
 
-  await Theme.findAll({
+  await ThemeSubscriberConnection.findAll({
     where: {
       theme_id: theme_id,
     },
@@ -48,6 +48,14 @@ const sendCardChange = async (card_id, createOrDelete) => {
   } else {
     message = `您订阅的主题: ${theme_id} 中的知识卡片: ${card_id} 被作者删除`;
   }
+
+  await ThemeSubscriberConnection.findAll({
+    where: {
+      theme_id: theme_id,
+    },
+  }).then((res) => {
+    openids = res.map((theme) => theme.openid);
+  });
 
   const infomations = openids.map((openid) => ({ openid, message }));
   await Information.bulkCreate(infomations);
