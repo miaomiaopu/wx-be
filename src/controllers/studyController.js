@@ -280,7 +280,7 @@ const cancelSelectCard = async (req, res) => {
     if (!openid) {
       res.status(404).json({ message: "Third session key not found" });
     } else {
-      await CardStudyTime.create({
+      await CardStudyTime.destroy({
         openid: openid,
         card_id: card_id,
       });
