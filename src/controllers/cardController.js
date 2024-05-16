@@ -54,7 +54,7 @@ const getAuthorAndCards = async (req, res) => {
       await sequelize
         .query(
           `
-        select cards.card_id, card_title
+        select cards.card_id, card_title, DATE_FORMAT(cards.card_modified_date, '%Y-%c-%e') AS card_modified_date
         from cards, theme_card_conn
         where cards.card_id = theme_card_conn.card_id and theme_id = :theme_id;
       `,
@@ -217,11 +217,13 @@ const getCard = async (req, res) => {
 
       // 获取card_content
       let content = "";
-      let card_modified_date = ""
+      let card_modified_date = "";
       await Card.findOne({ where: { card_id: card_id } }).then((result) => {
         content = result.card_content;
-        const date = result.card_modified_date
-        card_modified_date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}`
+        const date = result.card_modified_date;
+        card_modified_date = `${date.getFullYear()}-${
+          date.getMonth() + 1
+        }-${date.getDate()} ${date.getHours()}`;
       });
 
       const regex = /<i>\d<i>/g;
@@ -269,7 +271,7 @@ const getCard = async (req, res) => {
         image1: image1,
         image2: image2,
         image3: image3,
-        card_modified_date: card_modified_date
+        card_modified_date: card_modified_date,
       });
     }
   } catch (error) {
