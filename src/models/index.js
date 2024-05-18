@@ -12,6 +12,8 @@ import CardPicture from "./CardPicture.js";
 import CardStudyTime from "./CardStudyTime.js";
 import Comment from "./Comment.js";
 import ThemeCardConnection from "./ThemeCardConnection.js";
+import ThemeRanking from "./ThemeRanking.js";
+import UserRanking from "./UserRanking.js";
 
 export {
   User,
@@ -28,4 +30,6 @@ export {
   CardStudyTime,
   Comment,
   ThemeCardConnection,
+  ThemeRanking,
+  UserRanking,
 };

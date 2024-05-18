@@ -17,6 +17,7 @@ import cardRouter from "./routes/cardRoutes.js";
 import commentRouter from "./routes/commentRoutes.js";
 import studyRouter from "./routes/studyRoutes.js";
 import setTodayToZero from "./utils/setTodayToZero.js";
+import rankingRouter from "./routes/rankingRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -61,6 +62,8 @@ app.use("/api", cardRouter);
 app.use("/api", commentRouter);
 // 学习路由
 app.use("/api", studyRouter);
+// 排行榜路由
+app.use("/api", rankingRouter);
 
 // 统一错误处理
 app.use(errorHandler);
