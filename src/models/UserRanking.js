@@ -4,6 +4,12 @@ import sequelize from "../configs/database.js";
 const UserRanking = sequelize.define(
   "UserRanking",
   {
+    openid: {
+      type: DataTypes.STRING(28),
+      primaryKey: true,
+      allowNull: false,
+      comment: "用户唯一标识",
+    },
     nickname: {
       type: DataTypes.STRING(28),
       allowNull: false,

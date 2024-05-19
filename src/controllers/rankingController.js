@@ -22,9 +22,9 @@ const getUserRanking = async (req, res) => {
     } else {
       let ranking = [];
 
-      await ThemeRanking.findAll({
+      await UserRanking.findAll({
         order: [["grade", "DESC"]],
-        limit: 10,
+        limit: 20,
       }).then((res) => {
         ranking = res;
       });
@@ -60,9 +60,9 @@ const getThemeRanking = async (req, res) => {
     } else {
       let ranking = [];
 
-      await UserRanking.findAll({
+      await ThemeRanking.findAll({
         order: [["grade", "DESC"]],
-        limit: 10,
+        limit: 20,
       }).then((res) => {
         ranking = res;
       });

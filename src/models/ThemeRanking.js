@@ -6,8 +6,8 @@ const ThemeRanking = sequelize.define(
   {
     theme_id: {
       type: DataTypes.INTEGER.UNSIGNED,
-      primaryKey: true,
       allowNull: false,
+      primaryKey: true,
       comment: "主题唯一标识-外键",
     },
     theme_name: {
